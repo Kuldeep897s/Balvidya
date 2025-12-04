@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Alphabet Quiz | BalVidya</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    .quiz-box {
+      max-width: 500px;
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 15px;
+      background-color: #f8f9fa;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .option-btn {
+      margin-bottom: 10px;
+    }
+    .correct {
+      background-color: #d4edda !important;
+      border-color: #c3e6cb !important;
+    }
+    .wrong {
+      background-color: #f8d7da !important;
+      border-color: #f5c6cb !important;
+    }
+    .disabled {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container text-center my-4">
+    <h2>🔤 Alphabet Quiz Mode</h2>
+    <div id="quiz" class="quiz-box">
+      <h4 id="question" class="mb-3"></h4>
+      <div id="options" class="d-grid gap-2"></div>
+      <div id="feedback" class="my-2 fw-bold"></div>
+      <button id="nextBtn" onclick="nextQuestion()" class="btn btn-primary mt-3" disabled>Next</button>
+    </div>
+    <div class="mt-4">
+      <h5>Score: <span id="score">0</span> / <span id="total">0</span> | Time: <span id="timer">0</span> sec</h5>
+    </div>
+    <button onclick="resetQuiz()" class="btn btn-warning mt-3">Restart Quiz</button>
+     <br><br>
+    <a href="test.html" class="btn btn-secondary">⬅ Back to Test</a>
+  </div>
+
+  <script>
+    const alphabetWords = [
+      { letter: "A", word: "Apple" },
+      { letter: "B", word: "Ball" },
+      { letter: "C", word: "Cat" },
+      { letter: "D", word: "Dog" },
+      { letter: "E", word: "Elephant" },
+      { letter: "F", word: "Fish" },
+      { letter: "G", word: "Goat" },
+      { letter: "H", word: "Hat" },
+      { letter: "I", word: "Ice" },
+      { letter: "J", word: "Jug" },
+      { letter: "K", word: "Kite" },
+      { letter: "L", word: "Lion" },
+      { letter: "M", word: "Monkey" },
+      { letter: "N", word: "Nest" },
+      { letter: "O", word: "Orange" },
+      { letter: "P", word: "Pen" },
+      { letter: "Q", word: "Queen" },
+      { letter: "R", word: "Rabbit" },
+      { letter: "S", word: "Sun" },
+      { letter: "T", word: "Tiger" },
+      { letter: "U", word: "Umbrella" },
+      { letter: "V", word: "Van" },
+      { letter: "W", word: "Watch" },
+      { letter: "X", word: "Xylophone" },
+      { letter: "Y", word: "Yak" },
+      { letter: "Z", word: "Zebra" },
+    ];
+
+    let score = 0;
+    let total = 0;
+    let time = 0;
+    let current = {};
+    let remainingQuestions = [...alphabetWords];
+    let timerInterval;
+
+    function speak(text) {
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        speechSynthesis.speak(utterance);
+      }
+    }
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function startTimer() {
+      time = 0;
+      document.getElementById("timer").innerText = time;
+      timerInterval = setInterval(() => {
+        time++;
+        document.getElementById("timer").innerText = time;
+      }, 1000);
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+    }
+
+    function nextQuestion() {
+      document.getElementById("nextBtn").disabled = true;
+      document.getElementById("feedback").innerText = "";
+      if (remainingQuestions.length === 0) {
+        document.getElementById("question").innerText = "🎉 Quiz Completed!";
+        document.getElementById("options").innerHTML = "";
+        document.getElementById("nextBtn").style.display = "none";
+        stopTimer();
+        return;
+      }
+
+      total++;
+      document.getElementById("total").innerText = total;
+
+      const randomIndex = Math.floor(Math.random() * remainingQuestions.length);
+      current = remainingQuestions.splice(randomIndex, 1)[0];
+
+      document.getElementById("question").innerText = `What starts with '${current.letter}'?`;
+      speak(current.letter);
+
+      const options = [current];
+      while (options.length < 4) {
+        let rand = alphabetWords[Math.floor(Math.random() * alphabetWords.length)];
+        if (!options.includes(rand)) {
+          options.push(rand);
+        }
+      }
+
+      shuffleArray(options);
+      let optionsHTML = "";
+      options.forEach(opt => {
+        optionsHTML += `<button class="btn btn-outline-dark option-btn" onclick="checkAnswer(this, '${opt.word}')">${opt.word}</button>`;
+      });
+      document.getElementById("options").innerHTML = optionsHTML;
+    }
+
+    function checkAnswer(btn, selectedWord) {
+      const buttons = document.querySelectorAll(".option-btn");
+      buttons.forEach(b => b.classList.add('disabled'));
+
+      const correct = current.word;
+      if (selectedWord === correct) {
+        btn.classList.add("correct");
+        score++;
+        document.getElementById("feedback").innerText = "✅ Correct!";
+      } else {
+        btn.classList.add("wrong");
+        document.getElementById("feedback").innerText = `❌ Wrong! Correct: ${correct}`;
+      }
+      document.getElementById("score").innerText = score;
+      document.getElementById("nextBtn").disabled = false;
+    }
+
+    function resetQuiz() {
+      score = 0;
+      total = 0;
+      time = 0;
+      remainingQuestions = [...alphabetWords];
+      document.getElementById("score").innerText = 0;
+      document.getElementById("total").innerText = 0;
+      document.getElementById("nextBtn").style.display = "inline-block";
+      startTimer();
+      nextQuestion();
+    }
+
+    window.onload = () => {
+      resetQuiz();
+    };
+  </script>
+</body>
+</html>

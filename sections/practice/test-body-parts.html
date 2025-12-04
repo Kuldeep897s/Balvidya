@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Body Parts Quiz | BalVidya</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    body {
+      background-color: #fdfdfd;
+    }
+    .quiz-box {
+      max-width: 600px;
+      margin: 30px auto;
+      padding: 25px;
+      border-radius: 12px;
+      background-color: #f8f9fa;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .option-btn {
+      margin-bottom: 10px;
+    }
+    .correct {
+      background-color: #d4edda !important;
+      border-color: #c3e6cb !important;
+    }
+    .wrong {
+      background-color: #f8d7da !important;
+      border-color: #f5c6cb !important;
+    }
+    #nextBtn {
+      display: none;
+    }
+    #timer {
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container text-center my-4">
+    <h2>🧠 Body Parts Quiz</h2>
+    <div id="quiz" class="quiz-box">
+      <h4 id="question">Loading...</h4>
+      <div id="options" class="d-grid gap-2 mt-3"></div>
+      <div class="my-2">
+        <span id="timer" class="text-danger">⏱ 10</span>
+      </div>
+      <div id="feedback" class="my-2 fw-bold"></div>
+      <button id="nextBtn" onclick="nextQuestion()" class="btn btn-primary mt-3">Next</button>
+    </div>
+    <div class="mt-4">
+      <h5>Score: <span id="score">0</span> / <span id="total">0</span></h5>
+      <a href="test.html" class="btn btn-secondary mt-2">⬅️ Back to Test List</a>
+    </div>
+  </div>
+
+  <script>
+    const bodyParts = [
+      { word: "Head", hindi: "सिर" },
+      { word: "Eyes", hindi: "आंखें" },
+      { word: "Ears", hindi: "कान" },
+      { word: "Nose", hindi: "नाक" },
+      { word: "Mouth", hindi: "मुंह" },
+      { word: "Neck", hindi: "गर्दन" },
+      { word: "Shoulder", hindi: "कंधा" },
+      { word: "Arm", hindi: "बांह" },
+      { word: "Elbow", hindi: "कोहनी" },
+      { word: "Hand", hindi: "हाथ" },
+      { word: "Fingers", hindi: "उंगलियाँ" },
+      { word: "Stomach", hindi: "पेट" },
+      { word: "Waist", hindi: "कमर" },
+      { word: "Hip", hindi: "कूल्हा" },
+      { word: "Thigh", hindi: "जांघ" },
+      { word: "Knee", hindi: "घुटना" },
+      { word: "Leg", hindi: "टांग" },
+      { word: "Ankle", hindi: "टखना" },
+      { word: "Foot", hindi: "पैर" },
+      { word: "Toes", hindi: "पैर की उंगलियां" }
+    ];
+
+    let shuffledParts = [];
+    let current = {};
+    let score = 0;
+    let total = 0;
+    let timerInterval;
+    let timeLeft = 10;
+
+    function speak(text) {
+      const msg = new SpeechSynthesisUtterance(text);
+      msg.lang = 'en-US';
+      window.speechSynthesis.speak(msg);
+    }
+
+    function startTimer() {
+      timeLeft = 10;
+      document.getElementById("timer").innerText = `⏱ ${timeLeft}`;
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer").innerText = `⏱ ${timeLeft}`;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          showAnswer(null);
+        }
+      }, 1000);
+    }
+
+    function shuffleArray(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+    }
+
+    function nextQuestion() {
+      clearInterval(timerInterval);
+      document.getElementById("feedback").innerText = "";
+      document.getElementById("nextBtn").style.display = "none";
+
+      if (shuffledParts.length === 0) {
+        shuffledParts = [...bodyParts];
+        shuffleArray(shuffledParts);
+        score = 0;
+        total = 0;
+        document.getElementById("score").innerText = score;
+      }
+
+      current = shuffledParts.pop();
+      total++;
+      document.getElementById("total").innerText = total;
+      document.getElementById("question").innerText = `Which body part is: ${current.word}?`;
+      speak(current.word);
+
+      let options = [current];
+      while (options.length < 4) {
+        const rand = bodyParts[Math.floor(Math.random() * bodyParts.length)];
+        if (!options.includes(rand)) options.push(rand);
+      }
+
+      shuffleArray(options);
+
+      document.getElementById("options").innerHTML = "";
+      options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.className = "btn btn-outline-dark option-btn";
+        btn.innerText = `${opt.word} / ${opt.hindi}`;
+        btn.onclick = () => showAnswer(opt.word, btn);
+        document.getElementById("options").appendChild(btn);
+      });
+
+      startTimer();
+    }
+
+    function showAnswer(selectedWord, clickedBtn = null) {
+      clearInterval(timerInterval);
+
+      const correctWord = current.word;
+      const btns = document.querySelectorAll(".option-btn");
+      btns.forEach(btn => {
+        btn.disabled = true;
+        if (btn.innerText.includes(correctWord)) {
+          btn.classList.add("correct");
+        }
+      });
+
+      if (selectedWord === correctWord) {
+        score++;
+        document.getElementById("feedback").innerText = "✅ Correct!";
+        if (clickedBtn) clickedBtn.classList.add("correct");
+      } else if (selectedWord) {
+        document.getElementById("feedback").innerText = `❌ Wrong! Answer: ${correctWord} / ${current.hindi}`;
+        if (clickedBtn) clickedBtn.classList.add("wrong");
+      } else {
+        document.getElementById("feedback").innerText = `⏰ Time's up! Answer: ${correctWord} / ${current.hindi}`;
+      }
+
+      document.getElementById("score").innerText = score;
+      document.getElementById("nextBtn").style.display = "inline-block";
+    }
+
+    window.onload = () => {
+      shuffledParts = [...bodyParts];
+      shuffleArray(shuffledParts);
+      nextQuestion();
+    };
+  </script>
+</body>
+</html>
