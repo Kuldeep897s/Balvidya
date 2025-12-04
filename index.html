@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BalVidya - Kids Learning App</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Baloo+2:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="" crossorigin="anonymous">
+
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#f9fbff;
+      --card:#ffffff;
+      --accent:#4b0082;
+      --accent-2:#0d6efd;
+      --soft:#f6f9ff;
+      --muted:#6c6c6c;
+    }
+
+    html,body{height:100%}
+    body{
+      margin:0;
+      min-height:100%;
+      background: linear-gradient(180deg,#f3fbff 0%, #fffaf0 100%);
+      font-family: "Poppins", "Baloo 2", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      color:#1b1b1b;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      background: linear-gradient(90deg, #ffefc5 0%, #fff7e8 100%);
+      box-shadow: 0 6px 18px rgba(78,63,126,0.06);
+    }
+    .logo-text {
+      font-weight:700;
+      font-size:1.25rem;
+      color:var(--accent);
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+    }
+    .tagline{
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(180deg, rgba(75,0,130,0.05), rgba(13,110,253,0.02));
+      border-radius: 18px;
+      padding: 2.25rem;
+      box-shadow: 0 8px 30px rgba(13,110,253,0.03);
+    }
+    .hero h1{
+      font-family: "Baloo 2", "Poppins", sans-serif;
+      font-weight:700;
+      color:var(--accent);
+      margin-bottom:.25rem;
+    }
+    .hero p.lead{ color:#374151; margin-bottom:0; }
+
+    /* CARDS GRID */
+    .section-card{
+      background:var(--card);
+      border-radius:16px;
+      padding:1.5rem;
+      text-decoration:none;
+      color:inherit;
+      display:block;
+      height:100%;
+      transition: transform .18s cubic-bezier(.2,.9,.2,1), box-shadow .18s, border-color .18s;
+      border:1px solid rgba(15,23,42,0.03);
+    }
+    .section-card:active{ transform: translateY(2px) scale(.997); }
+    .section-card:hover{
+      transform: translateY(-6px);
+      box-shadow: 0 14px 30px rgba(13,110,253,0.08);
+      border-color: rgba(13,110,253,0.06);
+    }
+    .icon-box{
+      font-size:36px;
+      width:72px;
+      height:72px;
+      border-radius:14px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      margin:0 auto;
+      background: linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.01));
+      box-shadow: 0 6px 18px rgba(15,23,42,0.04);
+    }
+    .section-card h5{ font-weight:700; margin-top:.9rem; }
+    .section-card p.small{ color:var(--muted); margin-bottom:0; text-transform:capitalize; }
+
+    /* icon color classes */
+    .icon-1{ color:#ff6b35; background: linear-gradient(180deg, rgba(255,107,53,0.10), rgba(255,107,53,0.04)); }
+    .icon-2{ color:#0d6efd; background: linear-gradient(180deg, rgba(13,110,253,0.09), rgba(13,110,253,0.03)); }
+    .icon-3{ color:#12b886; background: linear-gradient(180deg, rgba(18,184,134,0.09), rgba(18,184,134,0.03)); }
+    .icon-4{ color:#d63384; background: linear-gradient(180deg, rgba(214,51,132,0.09), rgba(214,51,132,0.03)); }
+    .icon-5{ color:#f59e0b; background: linear-gradient(180deg, rgba(245,158,11,0.09), rgba(245,158,11,0.03)); }
+    .icon-6{ color:#6f42c1; background: linear-gradient(180deg, rgba(111,66,193,0.09), rgba(111,66,193,0.03)); }
+
+    /* responsive utilities */
+    @media (max-width:575px){
+      .hero { padding:1.25rem; border-radius:12px; }
+      .icon-box{ width:62px; height:62px; font-size:32px; }
+    }
+
+    /* Footer */
+    footer {
+      background: linear-gradient(90deg,#fff6e6,#f4f9ff);
+      padding:14px 10px;
+      text-align:center;
+      color:#4b5563;
+      margin-top:2.25rem;
+      border-top:1px solid rgba(15,23,42,0.03);
+    }
+
+    /* small helpers */
+    .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container">
+      <div class="d-flex align-items-center gap-3">
+        <a class="navbar-brand logo-text" href="#" aria-label="BalVidya homepage">🎓 BalVidya</a>
+        <span class="tagline d-none d-md-inline">Modern Learning · Safe · Fun</span>
+      </div>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse justify-content-end" id="mainNav">
+        <ul class="navbar-nav align-items-center">
+          <li class="nav-item"><a class="nav-link" href="sections/learn/learn.html">Learn</a></li>
+          <li class="nav-item"><a class="nav-link" href="sections/games/games.html">Games</a></li>
+          <li class="nav-item d-none d-lg-block"><a class="nav-link" href="sections/about.html">About</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTAINER -->
+  <main class="container my-4">
+
+    <!-- HERO -->
+    <div class="hero mb-4">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <h1>Welcome to BalVidya</h1>
+          <p class="lead">✨ Learn, play and grow — modern learning for curious kids. Safe, friendly, and easy to use.</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+          <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#comingSoonModal" aria-haspopup="dialog">What's new?</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTIONS GRID -->
+    <div class="row g-4">
+      <div class="col-6 col-sm-6 col-md-4">
+        <a href="sections/learn/learn.html" class="section-card card h-100 text-center p-3" aria-label="Learn section: letters numbers colors">
+          <div class="icon-box icon-1">📘</div>
+          <h5 class="mt-2">Learn</h5>
+          <p class="small">Letters, Numbers, Colors</p>
+        </a>
+      </div>
+
+      <div class="col-6 col-sm-6 col-md-4">
+        <a href="sections/games/games.html" class="section-card card h-100 text-center p-3" aria-label="Games section">
+          <div class="icon-box icon-2">🎮</div>
+          <h5 class="mt-2">Games</h5>
+          <p class="small">Playful puzzles & fun</p>
+        </a>
+      </div>
+
+      <div class="col-6 col-sm-6 col-md-4">
+        <a href="#" class="section-card card h-100 text-center p-3" data-bs-toggle="modal" data-bs-target="#comingSoonModal" aria-label="Stories coming soon">
+          <div class="icon-box icon-3">📖</div>
+          <h5 class="mt-2">Stories</h5>
+          <p class="small">Moral tales for kids</p>
+        </a>
+      </div>
+
+      <div class="col-6 col-sm-6 col-md-4">
+        <a href="#" class="section-card card h-100 text-center p-3" data-bs-toggle="modal" data-bs-target="#comingSoonModal" aria-label="Videos coming soon">
+          <div class="icon-box icon-4">🎬</div>
+          <h5 class="mt-2">Videos</h5>
+          <p class="small">Rhymes & Bhajans</p>
+        </a>
+      </div>
+
+      <div class="col-6 col-sm-6 col-md-4">
+        <a href="sections/practice/test.html" class="section-card card h-100 text-center p-3" aria-label="Practice tests">
+          <div class="icon-box icon-5">🧠</div>
+          <h5 class="mt-2">Practice</h5>
+          <p class="small">Test knowledge playfully</p>
+        </a>
+      </div>
+
+      <div class="col-6 col-sm-6 col-md-4">
+        <a href="sections/about.html" class="section-card card h-100 text-center p-3" aria-label="About creators">
+          <div class="icon-box icon-6">ℹ️</div>
+          <h5 class="mt-2">About</h5>
+          <p class="small">Know the creators</p>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Coming Soon Modal -->
+  <div class="modal fade" id="comingSoonModal" tabindex="-1" aria-labelledby="comingSoonLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-center">
+        <div class="modal-header border-0">
+          <h5 class="modal-title w-100" id="comingSoonLabel">🚧 Coming Soon</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Stories & Videos are on the way! 🚀<br>
+          We are crafting fun, safe and educational videos for children. Stay tuned for the next update! 🌟
+        </div>
+        <div class="modal-footer justify-content-center border-0">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    Made with ❤️ by Kuldeep Saini • © 2025 BalVidya
+  </footer>
+
+  <!-- Bootstrap Bundle JS (only once) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="" crossorigin="anonymous"></script>
+
+  <!-- Optional: small keyboard accessibility helper (close modal on Esc handled by bootstrap) -->
+  <script>
+    // Simple enhancement: focus the OK button when modal opens for faster keyboard access
+    var comingModal = document.getElementById('comingSoonModal')
+    if (comingModal) {
+      comingModal.addEventListener('shown.bs.modal', function () {
+        var ok = comingModal.querySelector('.modal-footer .btn')
+        if (ok) ok.focus()
+      })
+    }
+  </script>
+</body>
+</html>
