@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Learn Numbers - Hindi & English</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #fefefe;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 { color: #d32f2f; }
+    .numbers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: 15px;
+      max-width: 900px;
+      margin: auto;
+    }
+    .number-card {
+      background: #c8e6c9;
+      border-radius: 12px;
+      padding: 15px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #1b5e20;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: .2s;
+    }
+    .number-card:hover {
+      background: #a5d6a7;
+      transform: scale(1.1);
+    }
+    .number-name { font-size: 14px; color: #1b5e20; }
+  </style>
+</head>
+<body>
+
+  <h1>🔢 Learn Numbers</h1>
+
+  <h3 style="color:#388e3c;">Numbers 0-100</h3>
+  <div class="numbers-grid">
+
+    <script>
+      const numbers = [
+        {n:"0",hi:"शून्य",en:"Zero"},
+        {n:"1",hi:"एक",en:"One"},
+        {n:"2",hi:"दो",en:"Two"},
+        {n:"3",hi:"तीन",en:"Three"},
+        {n:"4",hi:"चार",en:"Four"},
+        {n:"5",hi:"पाँच",en:"Five"},
+        {n:"6",hi:"छह",en:"Six"},
+        {n:"7",hi:"सात",en:"Seven"},
+        {n:"8",hi:"आठ",en:"Eight"},
+        {n:"9",hi:"नौ",en:"Nine"},
+        {n:"10",hi:"दस",en:"Ten"},
+         {n:"11",hi:"ग्यारह",en:"Eleven"},
+{n:"12",hi:"बारह",en:"Twelve"},
+{n:"13",hi:"तेरह",en:"Thirteen"},
+{n:"14",hi:"चौदह",en:"Fourteen"},
+{n:"15",hi:"पंद्रह",en:"Fifteen"},
+{n:"16",hi:"सोलह",en:"Sixteen"},
+{n:"17",hi:"सत्रह",en:"Seventeen"},
+{n:"18",hi:"अठारह",en:"Eighteen"},
+{n:"19",hi:"उन्नीस",en:"Nineteen"},
+{n:"20",hi:"बीस",en:"Twenty"},
+
+{n:"21",hi:"इक्कीस",en:"Twenty One"},
+{n:"22",hi:"बाईस",en:"Twenty Two"},
+{n:"23",hi:"तेईस",en:"Twenty Three"},
+{n:"24",hi:"चौबीस",en:"Twenty Four"},
+{n:"25",hi:"पच्चीस",en:"Twenty Five"},
+{n:"26",hi:"छब्बीस",en:"Twenty Six"},
+{n:"27",hi:"सत्ताईस",en:"Twenty Seven"},
+{n:"28",hi:"अट्ठाईस",en:"Twenty Eight"},
+{n:"29",hi:"उनतीस",en:"Twenty Nine"},
+{n:"30",hi:"तीस",en:"Thirty"},
+
+{n:"31",hi:"इकतीस",en:"Thirty One"},
+{n:"32",hi:"बत्तीस",en:"Thirty Two"},
+{n:"33",hi:"तैंतीस",en:"Thirty Three"},
+{n:"34",hi:"चौंतीस",en:"Thirty Four"},
+{n:"35",hi:"पैंतीस",en:"Thirty Five"},
+{n:"36",hi:"छत्तीस",en:"Thirty Six"},
+{n:"37",hi:"सैंतीस",en:"Thirty Seven"},
+{n:"38",hi:"अड़तीस",en:"Thirty Eight"},
+{n:"39",hi:"उनतालीस",en:"Thirty Nine"},
+{n:"40",hi:"चालीस",en:"Forty"},
+
+{n:"41",hi:"इकतालीस",en:"Forty One"},
+{n:"42",hi:"बयालीस",en:"Forty Two"},
+{n:"43",hi:"तैंतालीस",en:"Forty Three"},
+{n:"44",hi:"चौंतालीस",en:"Forty Four"},
+{n:"45",hi:"पैंतालीस",en:"Forty Five"},
+{n:"46",hi:"छियालीस",en:"Forty Six"},
+{n:"47",hi:"सैंतालीस",en:"Forty Seven"},
+{n:"48",hi:"अड़तालीस",en:"Forty Eight"},
+{n:"49",hi:"उनचास",en:"Forty Nine"},
+{n:"50",hi:"पचास",en:"Fifty"},
+
+{n:"51",hi:"इक्यावन",en:"Fifty One"},
+{n:"52",hi:"बावन",en:"Fifty Two"},
+{n:"53",hi:"तिरेपन",en:"Fifty Three"},
+{n:"54",hi:"चौवन",en:"Fifty Four"},
+{n:"55",hi:"पचपन",en:"Fifty Five"},
+{n:"56",hi:"छप्पन",en:"Fifty Six"},
+{n:"57",hi:"सत्तावन",en:"Fifty Seven"},
+{n:"58",hi:"अट्ठावन",en:"Fifty Eight"},
+{n:"59",hi:"उनसठ",en:"Fifty Nine"},
+{n:"60",hi:"साठ",en:"Sixty"},
+
+{n:"61",hi:"इकसठ",en:"Sixty One"},
+{n:"62",hi:"बासठ",en:"Sixty Two"},
+{n:"63",hi:"तिरेसठ",en:"Sixty Three"},
+{n:"64",hi:"चौंसठ",en:"Sixty Four"},
+{n:"65",hi:"पैंसठ",en:"Sixty Five"},
+{n:"66",hi:"छियासठ",en:"Sixty Six"},
+{n:"67",hi:"सड़सठ",en:"Sixty Seven"},
+{n:"68",hi:"अड़सठ",en:"Sixty Eight"},
+{n:"69",hi:"उनहत्तर",en:"Sixty Nine"},
+{n:"70",hi:"सत्तर",en:"Seventy"},
+
+{n:"71",hi:"इकहत्तर",en:"Seventy One"},
+{n:"72",hi:"बहत्तर",en:"Seventy Two"},
+{n:"73",hi:"तिहत्तर",en:"Seventy Three"},
+{n:"74",hi:"चौहत्तर",en:"Seventy Four"},
+{n:"75",hi:"पचहत्तर",en:"Seventy Five"},
+{n:"76",hi:"छिहत्तर",en:"Seventy Six"},
+{n:"77",hi:"सतहत्तर",en:"Seventy Seven"},
+{n:"78",hi:"अठहत्तर",en:"Seventy Eight"},
+{n:"79",hi:"उन्यासी",en:"Seventy Nine"},
+{n:"80",hi:"अस्सी",en:"Eighty"},
+
+{n:"81",hi:"इक्यासी",en:"Eighty One"},
+{n:"82",hi:"बयासी",en:"Eighty Two"},
+{n:"83",hi:"तिरासी",en:"Eighty Three"},
+{n:"84",hi:"चौरासी",en:"Eighty Four"},
+{n:"85",hi:"पचासी",en:"Eighty Five"},
+{n:"86",hi:"छियासी",en:"Eighty Six"},
+{n:"87",hi:"सत्तासी",en:"Eighty Seven"},
+{n:"88",hi:"अठ्ठासी",en:"Eighty Eight"},
+{n:"89",hi:"नवासी",en:"Eighty Nine"},
+{n:"90",hi:"नब्बे",en:"Ninety"},
+
+{n:"91",hi:"इक्यानबे",en:"Ninety One"},
+{n:"92",hi:"बानवे",en:"Ninety Two"},
+{n:"93",hi:"तिरानबे",en:"Ninety Three"},
+{n:"94",hi:"चौरानबे",en:"Ninety Four"},
+{n:"95",hi:"पचानवे",en:"Ninety Five"},
+{n:"96",hi:"छियानवे",en:"Ninety Six"},
+{n:"97",hi:"सत्तानवे",en:"Ninety Seven"},
+{n:"98",hi:"अट्ठानवे",en:"Ninety Eight"},
+{n:"99",hi:"निन्यानवे",en:"Ninety Nine"},
+{n:"100",hi:"सौ",en:"One Hundred"},
+
+      ];
+      document.write(numbers.map(num => `
+        <div class='number-card' onclick="playAudio('${num.n}')">
+          <div>${num.n}</div>
+          <div class='number-name'>${num.hi} / ${num.en}</div>
+        </div>
+      `).join(''));
+    </script>
+
+  </div>
+
+  <div class="text-center mt-5">
+    <a href="learn.html" class="btn btn-secondary">⬅️ Back</a>
+  </div>
+
+  <script>
+    function playAudio(num) {
+      let audio = new Audio('audio/' + num + '.mp3');
+      audio.play();
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Learn Animals - Hindi & English</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #fff3e0;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #6d4c41;
+    }
+
+    .animal-section {
+      margin: 30px 0;
+    }
+
+    .animals-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: 15px;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    .animal-card {
+      background: #ffe0b2;
+      border-radius: 12px;
+      padding: 15px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #4e342e;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .animal-card:hover {
+      background: #ffd54f;
+      transform: scale(1.1);
+    }
+
+    .animal-icon {
+      font-size: 36px;
+      margin-bottom: 5px;
+    }
+
+    .animal-name {
+      font-size: 14px;
+      color: #4e342e;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      .animal-card {
+        font-size: 20px;
+        padding: 10px;
+      }
+      .animal-icon {
+        font-size: 28px;
+      }
+      .animal-name {
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🐾 Learn Animals</h1>
+
+  <div class="animal-section">
+    <h2 style="color:#6d4c41;">Animals</h2>
+    <div class="animals-grid">
+      <div class="animal-card" onclick="speak('कुत्ता')">
+        <div class="animal-icon">🐶</div>
+        कुत्ता
+        <div class="animal-name">Dog</div>
+      </div>
+      <div class="animal-card" onclick="speak('बिल्ली')">
+        <div class="animal-icon">🐱</div>
+        बिल्ली
+        <div class="animal-name">Cat</div>
+      </div>
+      <div class="animal-card" onclick="speak('हाथी')">
+        <div class="animal-icon">🐘</div>
+        हाथी
+        <div class="animal-name">Elephant</div>
+      </div>
+      <div class="animal-card" onclick="speak('सिंह')">
+        <div class="animal-icon">🦁</div>
+        सिंह
+        <div class="animal-name">Lion</div>
+      </div>
+      <div class="animal-card" onclick="speak('बन्दर')">
+        <div class="animal-icon">🐒</div>
+        बन्दर
+        <div class="animal-name">Monkey</div>
+      </div>
+      <div class="animal-card" onclick="speak('घोड़ा')">
+        <div class="animal-icon">🐴</div>
+        घोड़ा
+        <div class="animal-name">Horse</div>
+      </div>
+      <div class="animal-card" onclick="speak('ऊँट')">
+        <div class="animal-icon">🐫</div>
+        ऊँट
+        <div class="animal-name">Camel</div>
+      </div>
+      <div class="animal-card" onclick="speak('मछली')">
+        <div class="animal-icon">🐟</div>
+        मछली
+        <div class="animal-name">Fish</div>
+      </div>
+      <div class="animal-card" onclick="speak('कछुआ')">
+        <div class="animal-icon">🐢</div>
+        कछुआ
+        <div class="animal-name">Turtle</div>
+      </div>
+      <div class="animal-card" onclick="speak('मेंढक')">
+        <div class="animal-icon">🐸</div>
+        मेंढक
+        <div class="animal-name">Frog</div>
+      </div>
+      <!-- Add more animals here -->
+    </div>
+  </div>
+
+  <div class="text-center mt-5">
+    <a href="learn.html" class="btn btn-secondary">⬅️ Back</a>
+  </div>
+
+  <script>
+    function speak(text) {
+      const synth = window.speechSynthesis;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'hi-IN'; // Hindi pronunciation
+      synth.speak(utterance);
+    }
+  </script>
+</body>
+</html>

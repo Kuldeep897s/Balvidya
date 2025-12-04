@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Learn English Letters - A to Z (English + Hindi)</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background:#fefefe; padding:20px; text-align:center; }
+    h1 { color:#1976d2; margin-bottom:8px; }
+    .letters-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(90px,1fr)); gap:14px; max-width:980px; margin:18px auto; }
+    .letter-card { background:#bbdefb; border-radius:12px; padding:12px; font-size:22px; font-weight:700; color:#0d47a1; box-shadow:0 4px 6px rgba(0,0,0,0.08); cursor:pointer; transition:transform .12s, background .12s; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; min-height:96px; }
+    .letter-card:active { transform:scale(.98); }
+    .letter-icon { font-size:34px; margin-bottom:6px; }
+    .icon-name { font-size:13px; color:#0d47a1; margin-top:6px; }
+    .speaker { position:absolute; right:10px; top:8px; font-size:18px; opacity:.9; }
+    @media(max-width:600px){ .letter-card { font-size:18px; padding:8px; min-height:84px } .letter-icon{font-size:28px} .icon-name{font-size:12px} }
+  </style>
+</head>
+<body>
+
+  <h1>🎓 Learn English Letters (A–Z)</h1>
+  <p style="color:#333; margin-top:0; margin-bottom:8px;">Tap any card — plays <strong>English + Hindi</strong> (falls back to TTS if MP3 absent)</p>
+
+  <div class="letters-grid" id="grid"></div>
+
+  <div class="text-center mt-4">
+    <a href="learn.html" class="btn btn-secondary">⬅️ Back</a>
+  </div>
+
+  <script>
+    // Data for A-Z: letter, emoji, english example, hindi translation, filename
+    const LETTERS = [
+      ['A','🍎','A for Apple','सेब','a.mp3'],
+      ['B','⚽','B for Ball','गेंद','b.mp3'],
+      ['C','🐱','C for Cat','बिल्ली','c.mp3'],
+      ['D','🐶','D for Dog','कुत्ता','d.mp3'],
+      ['E','🐘','E for Elephant','हाथी','e.mp3'],
+      ['F','🐟','F for Fish','मछली','f.mp3'],
+      ['G','🐐','G for Goat','बकरी','g.mp3'],
+      ['H','🐴','H for Horse','घोड़ा','h.mp3'],
+      ['I','🍦','I for Ice Cream','आइसक्रीम','i.mp3'],
+      ['J','🥤','J for Juice','जूस','j.mp3'],
+      ['K','🪁','K for Kite','पतंग','k.mp3'],
+      ['L','🦁','L for Lion','शेर','l.mp3'],
+      ['M','🥭','M for Mango','आम','m.mp3'],
+      ['N','🪹','N for Nest','घोंसला','n.mp3'],
+      ['O','🍊','O for Orange','संतरा','o.mp3'],
+      ['P','🦜','P for Parrot','तोता','p.mp3'],
+      ['Q','👑','Q for Queen','रानी','q.mp3'],
+      ['R','🐇','R for Rabbit','खरगोश','r.mp3'],
+      ['S','☀️','S for Sun','सूरज','s.mp3'],
+      ['T','🐯','T for Tiger','बाघ','t.mp3'],
+      ['U','☂️','U for Umbrella','छाता','u.mp3'],
+      ['V','🚐','V for Van','वैन','v.mp3'],
+      ['W','⌚','W for Watch','घड़ी','w.mp3'],
+      ['X','🎼','X for Xylophone','ज़ायलोफ़ोन','x.mp3'],
+      ['Y','🐂','Y for Yak','याक','y.mp3'],
+      ['Z','🦓','Z for Zebra','ज़ेबरा','z.mp3']
+    ];
+
+    const grid = document.getElementById('grid');
+
+    // build cards
+    LETTERS.forEach(([letter,emoji,eng,hin,filename])=>{
+      const card = document.createElement('div');
+      card.className = 'letter-card';
+      card.innerHTML = `
+        <div class="speaker" title="Play audio">🔊</div>
+        <div class="letter-icon">${emoji}</div>
+        <div style="font-size:32px; line-height:1">${letter}</div>
+        <div class="icon-name">${eng} — ${hin}</div>
+      `;
+      // click handler: tries to play mp3 first, falls back to TTS
+      card.addEventListener('click', async (e)=>{
+        e.stopPropagation();
+        await playBilingualAudio(filename, eng + ' — ' + hin);
+      });
+      grid.appendChild(card);
+    });
+
+    // Try to load audio file from audio/<filename>. If it fails, use SpeechSynthesis fallback.
+    async function playBilingualAudio(filename, fallbackText) {
+      const audioUrl = `audio/${filename}`; // user may add real mp3s here
+      try {
+        // try fetch HEAD to see if file exists (works in same origin)
+        const resp = await fetch(audioUrl, { method: 'HEAD' });
+        if (resp.ok) {
+          // browser can load file — play via <audio>
+          playAudioElement(audioUrl);
+          return;
+        }
+      } catch (err) {
+        // fetch may fail due to CORS or not found - we'll fallback to TTS
+      }
+      // fallback: use SpeechSynthesis for bilingual output
+      speakBilingual(fallbackText);
+    }
+
+    function playAudioElement(src) {
+      const a = new Audio(src);
+      // try to play (some browsers require user gesture — we are in click handler)
+      a.play().catch(err=>{
+        // if playback fails, fallback to TTS
+        speakBilingualFromFilename(src);
+      });
+    }
+
+    // Build bilingual utterance: English (en-US), then short pause, then Hindi (hi-IN)
+    function speakBilingual(textCombined) {
+      // textCombined expected like: "A for Apple — सेब"
+      const parts = textCombined.split('—').map(p=>p.trim());
+      const synth = window.speechSynthesis;
+      if (!synth) return; // nothing we can do
+
+      // first part (English)
+      if (parts[0]) {
+        const u1 = new SpeechSynthesisUtterance(parts[0]);
+        u1.lang = 'en-US';
+        u1.rate = 0.95;
+        synth.speak(u1);
+      }
+      // small pause by using a silent utterance (not widely supported) or queue Hindi after short timeout
+      if (parts[1]) {
+        // queue after a small delay so it doesn't overlap
+        setTimeout(()=>{
+          const u2 = new SpeechSynthesisUtterance(parts[1]);
+          // choose Hindi voice if available; fallback to default
+          u2.lang = 'hi-IN';
+          u2.rate = 0.95;
+          window.speechSynthesis.speak(u2);
+        }, 650); // 650ms pause
+      }
+    }
+
+    // If playAudioElement failed, try to extract filename to fallback text
+    function speakBilingualFromFilename(src) {
+      // try derive letter key from filename, otherwise generic fallback
+      const name = src.split('/').pop().split('.')[0].toLowerCase();
+      const idx = 'abcdefghijklmnopqrstuvwxyz'.indexOf(name);
+      const fallback = LETTERS[idx] ? (LETTERS[idx][2] + ' — ' + LETTERS[idx][3]) : 'Letter audio';
+      speakBilingual(fallback);
+    }
+
+    // Optional: prevent overlapping TTS by cancelling before speaking
+    // (already handled by browser's queue, but we can cancel)
+    document.addEventListener('click', () => {
+      // keep default behavior: do not cancel on other clicks to allow short queue
+    });
+  </script>
+</body>
+</html>

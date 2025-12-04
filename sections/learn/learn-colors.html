@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Learn Colours - Hindi & English</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #fff8e1;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #e64a19;
+    }
+
+    .color-section {
+      margin: 30px 0;
+    }
+
+    .colors-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: 18px;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    .color-card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 16px;
+      color: #000000;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: 0.25s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-weight: bold;
+    }
+
+    .color-card:hover {
+      transform: scale(1.08);
+      box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+    }
+
+    .color-box {
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border: 2px solid rgba(0,0,0,0.15);
+    }
+
+    .color-name {
+      font-size: 15px;
+    }
+  </style>
+
+</head>
+<body>
+
+  <h1>🎨 Learn Colours</h1>
+
+  <div class="color-section">
+    <div class="colors-grid">
+
+      <div class="color-card" onclick="speak('लाल')">
+        <div class="color-box" style="background:#d50000;"></div>
+        <div class="color-name">लाल (Red)</div>
+      </div>
+      
+      <div class="color-card" onclick="speak('नीला')">
+        <div class="color-box" style="background:#2962ff;"></div>
+        <div class="color-name">नीला (Blue)</div>
+      </div>
+
+      <div class="color-card" onclick="speak('हरा')">
+        <div class="color-box" style="background:#2e7d32;"></div>
+        <div class="color-name">हरा (Green)</div>
+      </div>
+
+      <div class="color-card" onclick="speak('पीला')">
+        <div class="color-box" style="background:#ffd600;"></div>
+        <div class="color-name">पीला (Yellow)</div>
+      </div>
+
+      <div class="color-card" onclick="speak('काला')">
+        <div class="color-box" style="background:#000000;"></div>
+        <div class="color-name">काला (Black)</div>
+      </div>
+
+      <div class="color-card" onclick="speak('सफ़ेद')">
+        <div class="color-box" style="background:#ffffff;"></div>
+        <div class="color-name">सफ़ेद (White)</div>
+      </div>
+
+      <div class="color-card" onclick="speak('नारंगी')">
+        <div class="color-box" style="background:#fb8c00;"></div>
+        <div class="color-name">नारंगी (Orange)</div>
+      </div>
+
+      <div class="color-card" onclick="speak('बैंगनी')">
+        <div class="color-box" style="background:#7b1fa2;"></div>
+        <div class="color-name">बैंगनी (Purple)</div>
+      </div>
+
+      <div class="color-card" onclick="speak('भूरा')">
+        <div class="color-box" style="background:#795548;"></div>
+        <div class="color-name">भूरा (Brown)</div>
+      </div>
+
+      <div class="color-card" onclick="speak('गुलाबी')">
+        <div class="color-box" style="background:#f06292;"></div>
+        <div class="color-name">गुलाबी (Pink)</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="text-center mt-5">
+    <a href="learn.html" class="btn btn-secondary">⬅️ Back</a>
+  </div>
+
+  <script>
+    function speak(text) {
+      const synth = window.speechSynthesis;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'hi-IN';
+      synth.speak(utterance);
+    }
+  </script>
+
+</body>
+</html>
