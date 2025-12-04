@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Games | BalVidya</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet"/>
+
+  <style>
+    body {
+      background: #f7faff;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    /* Navbar */
+    .navbar {
+      background: #ffffff;
+      border-bottom: 1px solid #e3e6ef;
+      padding: 12px 0;
+    }
+
+    .logo-text {
+      font-weight: 700;
+      font-size: 22px;
+      color: #0d6efd;
+    }
+
+    .subtitle {
+      color: #777;
+      font-size: 14px;
+    }
+
+    /* Cards */
+    .game-card {
+      border-radius: 18px;
+      padding: 20px 10px;
+      text-align: center;
+      background: #ffffff;
+      border: none;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.07);
+      transition: all 0.25s ease;
+    }
+
+    .game-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 10px 26px rgba(0,0,0,0.12);
+    }
+
+    .icon-box {
+      font-size: 42px;
+      margin-bottom: 10px;
+    }
+
+    /* Footer */
+    footer {
+      background: #ffffff;
+      border-top: 1px solid #e3e6ef;
+      padding: 12px;
+      text-align: center;
+      color: #555;
+      margin-top: 40px;
+    }
+
+    a.game-card {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    h5 {
+      font-weight: 600;
+      color: #003d99;
+    }
+
+    p.small {
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="container d-flex justify-content-between align-items-center">
+    <a href="../../index.html" class="navbar-brand logo-text">⬅️ BalVidya</a>
+    <span class="subtitle d-none d-sm-inline">Play & Learn!</span>
+  </div>
+</nav>
+
+<!-- Header -->
+<header class="text-center py-4">
+  <h2 class="fw-bold" style="color:#0d6efd;">🎮 Let's Play!</h2>
+  <p class="text-muted">Choose a game to have fun and learn</p>
+</header>
+
+<!-- Games Grid -->
+<div class="container">
+  <div class="row g-4">
+
+    <div class="col-6 col-md-4">
+      <a href="game-memory.html" class="game-card d-block">
+        <div class="icon-box text-warning">🧠</div>
+        <h5>Memory Match</h5>
+        <p class="small">Find the matching cards</p>
+      </a>
+    </div>
+
+    <div class="col-6 col-md-4">
+      <a href="game-puzzle.html" class="game-card d-block">
+        <div class="icon-box text-danger">🧩</div>
+        <h5>Jigsaw Puzzle</h5>
+        <p class="small">Complete the picture</p>
+      </a>
+    </div>
+
+    <div class="col-6 col-md-4">
+      <a href="game-dragdrop.html" class="game-card d-block">
+        <div class="icon-box text-success">🧲</div>
+        <h5>Drag & Drop</h5>
+        <p class="small">Match items correctly</p>
+      </a>
+    </div>
+
+    <div class="col-6 col-md-4">
+      <a href="game-Balloon.html" class="game-card d-block">
+        <div class="icon-box text-info">🎈</div>
+        <h5>Balloon Game</h5>
+        <p class="small">Fun Kids Game</p>
+      </a>
+    </div>
+
+    <div class="col-6 col-md-4">
+      <a href="game-TicTacToe.html" class="game-card d-block">
+        <div class="icon-box text-secondary">❌⭕</div>
+        <h5>TicTacToe</h5>
+        <p class="small"> 2 friends play Fun Kids Game </p>
+      </a>
+    </div>
+    
+    <div class="col-6 col-md-4">
+      <a href="game-sudoku.html" class="game-card d-block">
+        <div class="icon-box text-info">🔢</div>
+        <h5>Sudoku game</h5>
+        <p class="small">Fun Kids Game</p>
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  © 2025 BalVidya | Learn While You Play! 🎲
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
