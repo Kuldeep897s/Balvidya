@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memory Game | BalVidya</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+  body{
+    background:#fef9f4;
+    font-family:'Segoe UI',sans-serif;
+    text-align:center;
+    padding:20px;
+  }
+  #game-board{
+    display:grid;
+    gap:10px;
+    justify-content:center;
+    margin:20px auto;
+  }
+  .card{
+    width:80px;height:80px;
+    background:#fff;
+    font-size:2.2rem;
+    border-radius:12px;
+    border:2px solid #aaa;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:transform .3s;
+    user-select:none;
+  }
+  .matched{
+    background:#c4ffd2 !important;
+    animation:bounce .5s;
+  }
+  @keyframes bounce{
+    0%{transform:scale(1)}
+    50%{transform:scale(1.2)}
+    100%{transform:scale(1)}
+  }
+  .disabled{
+    pointer-events:none;
+    opacity:.6;
+  }
+</style>
+</head>
+<body>
+
+<h2>🧠 BalVidya: Memory Game</h2>
+
+<div class="d-flex justify-content-center gap-3">
+  <div>⏱ समय: <span id="timer">00</span></div>
+  <div>🧮 चालें: <span id="moves">0</span></div>
+</div>
+
+<div class="mt-2">
+  🎯 कठिनाई:
+  <select id="level" class="form-select d-inline w-auto" onchange="startGame()">
+    <option value="easy">आसान (4x4)</option>
+    <option value="medium">मध्यम (4x5)</option>
+    <option value="hard">कठिन (5x6)</option>
+  </select>
+</div>
+
+<div id="game-board"></div>
+
+<button class="btn btn-success" onclick="startGame()">🔁 फिर से शुरू करें</button>
+<button class="btn btn-warning" onclick="toggleSound()">🔇/🔊 आवाज़</button>
+<br><br>
+<a href="games.html" class="btn btn-outline-primary">🎮 Back to Games</a>
+
+<script>
+const allEmojis =  [
+  '🦄', // Unicorn
+  '🧙', // Wizard
+  '🪄', // Magic Wand
+  '🐉', // Dragon
+  '🧚', // Fairy
+  '🧞', // Genie
+  '🌟', // Star
+  '🦋', // Magical Butterfly
+  '🧜‍♀', // Mermaid
+  '🧝‍♂️', // Elf
+  '🛸', // UFO
+  '🎠', // Carousel
+  '⚡', // Lightning
+  '🪐', // Planet
+  '🍄', // Magic Mushroom
+  '🌈'  // Rainbow
+];
+
+let gameEmojis, rows, cols;
+let revealed = [], matched = 0, moves = 0;
+let timer, timeLeft;
+let soundEnabled = true;
+
+const tts = window.speechSynthesis;
+function speak(text){
+  if(!soundEnabled) return;
+  let msg = new SpeechSynthesisUtterance(text);
+  msg.lang='hi-IN';
+  tts.speak(msg);
+}
+
+function shuffle(array){
+  return array.sort(()=>Math.random()-0.5);
+}
+
+function setLevel(){
+  let level=document.getElementById("level").value;
+  if(level==="easy"){rows=4;cols=4;timeLeft=40;}
+  if(level==="medium"){rows=4;cols=5;timeLeft=50;}
+  if(level==="hard"){rows=5;cols=6;timeLeft=70;}
+}
+
+function startTimer(){
+  clearInterval(timer);
+  document.getElementById('timer').innerText=timeLeft;
+  timer=setInterval(()=>{
+    timeLeft--;
+    document.getElementById('timer').innerText=timeLeft;
+    if(timeLeft<=0){clearInterval(timer);endGame(false);}
+  },1000);
+}
+
+function startGame(){
+  setLevel();
+  matched=0;
+  moves=0;
+  revealed=[];
+  
+  document.getElementById('moves').innerText=moves;
+  
+  gameEmojis = shuffle([...allEmojis.slice(0,(rows*cols)/2), ...allEmojis.slice(0,(rows*cols)/2)]);
+  gameEmojis = shuffle(gameEmojis);
+
+  const board=document.getElementById('game-board');
+  board.innerHTML="";
+  board.style.gridTemplateColumns=`repeat(${cols}, 80px)`;
+
+  gameEmojis.forEach((emoji,i)=>{
+    let card=document.createElement('div');
+    card.className="card";
+    card.dataset.value=emoji;
+    card.onclick=()=>reveal(card);
+    board.appendChild(card);
+  });
+
+  startTimer();
+}
+
+function reveal(card){
+  if(card.classList.contains("revealed") || revealed.length===2) return;
+
+  card.innerHTML=card.dataset.value;
+  card.classList.add("revealed");
+  revealed.push(card);
+
+  if(revealed.length===2){
+    moves++;
+    document.getElementById("moves").innerText=moves;
+
+    const [c1,c2]=revealed;
+
+    if(c1.dataset.value===c2.dataset.value){
+      speak("वाह! सही जोड़ी!");
+      c1.classList.add("matched");
+      c2.classList.add("matched");
+      matched++;
+
+      revealed=[];
+      if(matched === gameEmojis.length/2){
+        clearInterval(timer);
+        endGame(true);
+      }
+    }else{
+      speak("ओह! गलत है!");
+      setTimeout(()=>{
+        c1.innerHTML="";
+        c2.innerHTML="";
+        c1.classList.remove("revealed");
+        c2.classList.remove("revealed");
+        revealed=[];
+      },800);
+    }
+  }
+}
+
+function endGame(won){
+  let title = won ? "🎉 शानदार! जीत गए!" : "⏳ समय खत्म!";
+  let msg = won ? `आपने ${moves} चालों में पूरा किया!` : `अगली बार और अच्छा करें!`;
+
+  speak(title);
+
+  Swal.fire({
+    title,text:msg,icon:won?'success':'error',
+    confirmButtonText:'फिर से खेलें'
+  }).then(()=>startGame());
+}
+
+function toggleSound(){
+  soundEnabled=!soundEnabled;
+}
+
+window.onload=startGame;
+</script>
+
+</body>
+</html>

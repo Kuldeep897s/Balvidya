@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title> Balvidya|Balloon Pop Game</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(to top, #87ceeb, #ffffff);
+    height: 100vh;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    touch-action: none;
+  }
+  .balloon {
+    position: absolute;
+    width: 60px;
+    height: 80px;
+    border-radius: 50% 50% 50% 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+    user-select: none;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    transition: transform 0.1s;
+  }
+  .balloon:active {
+    transform: scale(1.2);
+  }
+  .score-board, .info {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: bold;
+    text-align: center;
+    z-index: 10;
+  }
+  .score-board {
+    top: 10px;
+    font-size: 24px;
+  }
+  .info {
+    top: 50px;
+    font-size: 18px;
+  }
+  #startBtn, #backBtn {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
+    padding: 15px 30px;
+    z-index: 20;
+  }
+  #startBtn { top: 50%; transform: translate(-50%, -50%); }
+  #backBtn { top: 90%; display: none; }
+  
+  /* Game Over Popup */
+  #gameOverPopup {
+    display: none;
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 15px;
+    padding: 30px 40px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    text-align: center;
+    z-index: 50;
+  }
+  #gameOverPopup h2 { margin-bottom: 20px; color: #ff3d00; }
+</style>
+</head>
+<body>
+
+<div class="score-board">Score: <span id="score">0</span></div>
+<div class="info">Lives: <span id="lives">5</span> | Time: <span id="timer">60</span>s</div>
+<button id="startBtn" class="btn btn-primary">Start Game</button>
+<button id="backBtn" class="btn btn-secondary">🎮 Back</button>
+
+<!-- Game Over Popup -->
+<div id="gameOverPopup">
+  <h2>Game Over!</h2>
+  <p>Your Score: <span id="finalScore">0</span></p>
+  <button id="restartBtn" class="btn btn-success">Restart</button>
+</div>
+
+<audio id="popSound" src="https://www.soundjay.com/button/sounds/button-16.mp3"></audio>
+
+<script>
+let score = 0;
+let lives = 5;
+let time = 60; 
+let level = 1;
+let gameActive = false;
+let balloonSpawner;
+const colors = ["red", "blue", "green", "yellow", "purple", "orange"];
+const popSound = document.getElementById("popSound");
+
+const scoreEl = document.getElementById("score");
+const livesEl = document.getElementById("lives");
+const timerEl = document.getElementById("timer");
+const startBtn = document.getElementById("startBtn");
+const backBtn = document.getElementById("backBtn");
+const gameOverPopup = document.getElementById("gameOverPopup");
+const finalScoreEl = document.getElementById("finalScore");
+const restartBtn = document.getElementById("restartBtn");
+
+function updateUI() {
+    scoreEl.innerText = score;
+    livesEl.innerText = lives;
+    timerEl.innerText = time;
+}
+
+function createBalloon() {
+    if (!gameActive) return;
+
+    const balloon = document.createElement("div");
+    balloon.classList.add("balloon");
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    balloon.style.backgroundColor = color;
+
+    const x = Math.random() * (window.innerWidth - 60);
+    balloon.style.left = x + "px";
+    balloon.style.bottom = "-100px";
+
+    document.body.appendChild(balloon);
+
+    let position = -100;
+    const speed = 1 + Math.random() * level * 0.5;
+    const floatInterval = setInterval(() => {
+        position += speed;
+        balloon.style.bottom = position + "px";
+        if (position > window.innerHeight) {
+            balloon.remove();
+            clearInterval(floatInterval);
+            lives--;
+            updateUI();
+            if (lives <= 0) showGameOver();
+        }
+    }, 20);
+
+    function popBalloon() {
+        if (!gameActive) return;
+        score++;
+        popSound.currentTime = 0;
+        popSound.play();
+        balloon.remove();
+        clearInterval(floatInterval);
+        updateUI();
+    }
+
+    balloon.addEventListener("click", popBalloon);
+    balloon.addEventListener("touchstart", popBalloon);
+}
+
+let gameTimer;
+function startGame() {
+    score = 0;
+    lives = 5;
+    time = 60;
+    level = 1;
+    gameActive = true;
+    startBtn.style.display = "none";
+    backBtn.style.display = "block";
+    gameOverPopup.style.display = "none";
+    updateUI();
+
+    gameTimer = setInterval(() => {
+        if(time > 0){
+            time--;
+            updateUI();
+            if(time % 15 === 0) level++;
+        } else {
+            showGameOver();
+        }
+    }, 1000);
+
+    balloonSpawner = setInterval(() => {
+        if(gameActive) createBalloon();
+    }, 1000 / level);
+}
+
+function showGameOver() {
+    gameActive = false;
+    clearInterval(gameTimer);
+    clearInterval(balloonSpawner);
+    finalScoreEl.innerText = score;
+    gameOverPopup.style.display = "block";
+}
+
+// Restart Button
+restartBtn.addEventListener("click", () => {
+    startGame();
+});
+
+// Back button functionality
+backBtn.addEventListener("click", () => {
+    gameActive = false;
+    clearInterval(gameTimer);
+    clearInterval(balloonSpawner);
+    location.href = "games.html"; // change to your home page
+});
+
+startBtn.addEventListener("click", startGame);
+
+</script>
+</body>
+</html>

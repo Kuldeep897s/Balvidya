@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BalVidya | ड्रैग और ड्रॉप (Upgraded)</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    body { font-family: 'Baloo Bhai 2', system-ui, -apple-system, sans-serif; background: #fef6e4; padding: 18px; }
+    h1 { text-align: center; color: #e36414; margin-bottom: 18px; }
+    .drag-item, .drop-zone {
+      border: 2px dashed #ccc;
+      padding: 12px;
+      margin: 8px;
+      text-align: center;
+      border-radius: 10px;
+      background: #fff3e0;
+      min-height: 56px;
+      font-size: 20px;
+      display:flex; align-items:center; justify-content:center;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .drag-item[aria-disabled="true"]{ opacity:0.45; pointer-events:none; }
+    .correct { background: #d4edda !important; border-color: #28a745 !important; box-shadow: 0 6px 18px rgba(40,167,69,0.08); }
+    .wrong { background: #f8d7da !important; border-color: #dc3545 !important; animation: shake 0.35s; }
+    @keyframes shake { 0%{transform:translateX(0)} 25%{transform:translateX(-6px)} 50%{transform:translateX(6px)} 75%{transform:translateX(-4px)} 100%{transform:translateX(0)} }
+    .emoji { font-size: 40px; }
+    #message { font-size: 20px; margin-top: 12px; min-height:24px; }
+    #game-area { margin-top: 12px; }
+    .col-left, .col-right { min-height: 160px; }
+    .controls { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:8px; }
+    .matched-word { font-size:0.9rem; margin-top:6px; color:#333; background:#fff; padding:4px 6px; border-radius:6px; box-shadow:0 3px 8px rgba(0,0,0,0.04); }
+    .small-muted{ font-size:0.9rem; color:#666; text-align:center; margin-top:8px; }
+  </style>
+</head>
+<body>
+  <h1>BalVidya | 🎯 ड्रैग और ड्रॉप गेम</h1>
+
+  <div class="container mb-2">
+    <div class="row g-2 align-items-center">
+      <div class="col-md-4">
+        <label class="form-label">🎨 थीम चुनें:</label>
+        <select id="themeSelect" class="form-select theme-select">
+          <option value="fruits">🍎 फल</option>
+          <option value="animals">🐘 जानवर</option>
+          <option value="bodyparts">✋ शरीर के अंग</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">🚀 लेवल:</label>
+        <select id="levelSelect" class="form-select level-select">
+          <option value="1">Level 1 (3 Items)</option>
+          <option value="2">Level 2 (5 Items)</option>
+          <option value="3">Level 3 (7 Items)</option>
+        </select>
+      </div>
+      <div class="col-md-4 d-flex gap-2 align-items-end">
+        <div class="controls w-100">
+          <button id="btnReset" class="btn btn-outline-secondary btn-sm">🔁 Reset</button>
+          <button id="btnShuffle" class="btn btn-primary btn-sm">🔀 Shuffle</button>
+          <button id="btnBack" class="btn btn-warning btn-sm" onclick="location.href='games.html'">🔙 Back</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" id="game-area">
+    <!-- Game columns injected here -->
+  </div>
+
+  <div class="text-center">
+    <div id="message" class="mt-3"></div>
+    <div class="small-muted">सहायता: touch पर शब्द दबाकर रखें और emoji पर छोड़ें (mobile friendly)</div>
+  </div>
+
+<script>
+  const themes = {
+    fruits: {
+      1: { 'सेब': '🍎', 'केला': '🍌', 'आम': '🥭' },
+      2: { 'सेब': '🍎', 'केला': '🍌', 'आम': '🥭', 'संतरा': '🍊', 'अंगूर': '🍇' },
+      3: { 'सेब': '🍎', 'केला': '🍌', 'आम': '🥭', 'संतरा': '🍊', 'अंगूर': '🍇', 'अनार': '🍒', 'नाशपाती': '🍐' }
+    },
+    animals: {
+      1: { 'हाथी': '🐘', 'शेर': '🦁', 'गाय': '🐄' },
+      2: { 'हाथी': '🐘', 'शेर': '🦁', 'गाय': '🐄', 'बिल्ली': '🐱', 'कुत्ता': '🐶' },
+      3: { 'हाथी': '🐘', 'शेर': '🦁', 'गाय': '🐄', 'बिल्ली': '🐱', 'कुत्ता': '🐶', 'घोड़ा': '🐴', 'भालू': '🐻' }
+    },
+    bodyparts: {
+      1: { 'आँख': '👁️', 'हाथ': '🤚', 'पैर': '🦶' },
+      2: { 'आँख': '👁️', 'हाथ': '🤚', 'पैर': '🦶', 'कान': '👂', 'नाक': '👃' },
+      3: { 'आँख': '👁️', 'हाथ': '🤚', 'पैर': '🦶', 'कान': '👂', 'नाक': '👃', 'मुंह': '👄', 'सिर': '🧠' }
+    }
+  };
+
+  const gameArea = document.getElementById('game-area');
+  const themeSelect = document.getElementById('themeSelect');
+  const levelSelect = document.getElementById('levelSelect');
+  const message = document.getElementById('message');
+  const btnShuffle = document.getElementById('btnShuffle');
+  const btnReset = document.getElementById('btnReset');
+
+  let currentData = {};
+  let dragWord = null; // for touch fallback
+  let allowTouch = true;
+
+  function speak(text){
+    if(!('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'hi-IN';
+    // try pick Hindi voice
+    const voices = speechSynthesis.getVoices();
+    const v = voices.find(x => /hi|hindi/i.test(x.lang) || /Hindi/i.test(x.name));
+    if(v) u.voice = v;
+    speechSynthesis.speak(u);
+  }
+
+  function shuffleArray(arr){
+    for(let i=arr.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [arr[i],arr[j]] = [arr[j],arr[i]];
+    }
+    return arr;
+  }
+
+  function loadGame(){
+    gameArea.innerHTML = '';
+    message.textContent = '';
+    const theme = themeSelect.value;
+    const lvl = levelSelect.value;
+    const data = themes[theme][lvl];
+    currentData = JSON.parse(JSON.stringify(data)); // copy
+    const words = Object.keys(data);
+    const emojis = Object.values(data);
+
+    // shuffle separately so matching becomes challenge
+    const leftWords = shuffleArray([...words]);
+    const rightEmojis = shuffleArray([...emojis]);
+
+    // create row with two columns
+    const row = document.createElement('div');
+    row.className = 'row align-items-start';
+
+    const leftCol = document.createElement('div');
+    leftCol.className = 'col-md-6 col-left';
+
+    const rightCol = document.createElement('div');
+    rightCol.className = 'col-md-6 col-right';
+
+    // create draggable word items
+    leftWords.forEach((w,i)=>{
+      const div = document.createElement('div');
+      div.className = 'drag-item';
+      div.textContent = w;
+      div.draggable = true;
+      div.setAttribute('role','button');
+      div.setAttribute('aria-disabled','false');
+      div.dataset.word = w;
+      // dragstart for desktop
+      div.addEventListener('dragstart', (e)=>{
+        e.dataTransfer.setData('text/plain', w);
+      });
+      // touch fallback: pointerdown/touchstart
+      div.addEventListener('pointerdown', (e)=>{
+        // for touch, set dragWord and add a small active style
+        if(e.pointerType === 'touch'){
+          dragWord = w;
+          div.style.transform = 'scale(0.98)';
+        }
+      });
+      div.addEventListener('pointerup', (e)=>{
+        if(e.pointerType === 'touch'){
+          // clear transform after short time
+          setTimeout(()=> div.style.transform = '', 120);
+        }
+      });
+      leftCol.appendChild(div);
+    });
+
+    // create drop zones with emojis
+    rightEmojis.forEach((emj,i)=>{
+      const zone = document.createElement('div');
+      zone.className = 'drop-zone emoji';
+      zone.innerHTML = emj;
+      zone.dataset.answer = Object.keys(data).find(key => data[key] === emj); // word that matches this emoji
+      zone.setAttribute('aria-dropeffect','move');
+
+      // allow dragover
+      zone.addEventListener('dragover', (e)=> e.preventDefault());
+
+      zone.addEventListener('drop', (e)=>{
+        e.preventDefault();
+        const draggedText = e.dataTransfer.getData('text/plain');
+        handleDrop(zone, draggedText);
+      });
+
+      // pointerup for touch fallback: if touch ended on zone and dragWord set
+      zone.addEventListener('pointerup', (e)=>{
+        if(dragWord){
+          handleDrop(zone, dragWord);
+          dragWord = null;
+        }
+      });
+
+      rightCol.appendChild(zone);
+    });
+
+    // append columns to row and row to area
+    row.appendChild(leftCol);
+    row.appendChild(rightCol);
+    gameArea.appendChild(row);
+
+    // save initial DOM for reset
+    message.textContent = '';
+  }
+
+  function handleDrop(zone, draggedText){
+    if(!draggedText) return;
+    // if zone already matched, ignore
+    if(zone.classList.contains('correct')) return;
+
+    if(draggedText === zone.dataset.answer){
+      zone.classList.add('correct');
+      // append matched word below emoji
+      const m = document.createElement('div');
+      m.className = 'matched-word';
+      m.textContent = draggedText;
+      zone.appendChild(m);
+      speak('सही!');
+      message.textContent = '👍 सही मिलान!';
+      // disable corresponding drag item
+      const dragItems = document.querySelectorAll('.drag-item');
+      for(const d of dragItems){
+        if(d.dataset.word === draggedText){
+          d.setAttribute('aria-disabled','true');
+          d.draggable = false;
+          d.style.opacity = 0.45;
+          break;
+        }
+      }
+      checkComplete();
+    } else {
+      // wrong
+      zone.classList.add('wrong');
+      speak('गलत');
+      message.textContent = '❌ गलत! फिर से कोशिश करें।';
+      setTimeout(()=> zone.classList.remove('wrong'), 700);
+    }
+  }
+
+  function checkComplete(){
+    const zones = document.querySelectorAll('.drop-zone');
+    const all = Array.from(zones).every(z => z.classList.contains('correct'));
+    if(all){
+      message.textContent = "🎉 शाबाश! आपने सभी मिलान सही किए!";
+      speak("बहुत बढ़िया! आपने सब सही किया!");
+      // store last completed (optional)
+      localStorage.setItem('lastCompleted', `${themeSelect.value}-L${levelSelect.value}`);
+    }
+  }
+
+  // shuffle right side only (re-randomize emojis)
+  btnShuffle.addEventListener('click', ()=>{
+    loadGame(); // simplest: rebuild
+    message.textContent = '🔀 Shuffle किया गया';
+  });
+
+  btnReset.addEventListener('click', ()=>{
+    // simply reload the selected game
+    loadGame();
+    message.textContent = '🔁 Reset किया गया';
+  });
+
+  // event listeners
+  themeSelect.addEventListener('change', loadGame);
+  levelSelect.addEventListener('change', loadGame);
+
+  // init
+  window.addEventListener('load', ()=>{
+    // ensure voices loaded for speechSynthesis voices
+    if ('speechSynthesis' in window) speechSynthesis.getVoices();
+    loadGame();
+  });
+
+  // Accessibility: keyboard support (select word then press Enter on drop zone)
+  let keyboardSelectedWord = null;
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Tab') return;
+  });
+
+  // Optional: make left column items also clickable for keyboard users
+  gameArea.addEventListener('click', (ev)=>{
+    const target = ev.target.closest('.drag-item');
+    if(target && target.getAttribute('aria-disabled') !== 'true'){
+      // toggle selection
+      const prev = document.querySelector('.drag-item.selected');
+      if(prev) prev.classList.remove('selected');
+      target.classList.add('selected');
+      keyboardSelectedWord = target.dataset.word;
+      message.textContent = `चुना गया: ${keyboardSelectedWord} — अब किसी emoji पर क्लिक करें।`;
+    }
+    const zone = ev.target.closest('.drop-zone');
+    if(zone && keyboardSelectedWord){
+      handleDrop(zone, keyboardSelectedWord);
+      const prev = document.querySelector('.drag-item.selected');
+      if(prev) prev.classList.remove('selected');
+      keyboardSelectedWord = null;
+    }
+  });
+</script>
+</body>
+</html>

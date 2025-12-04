@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <title>BalVidya | Jigsaw Puzzle (Upgraded)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root{
+      --accent:#0d6efd;
+      --accent-2:#ff7a59;
+      --bg:#f7fafc;
+      --card:#ffffff;
+      --kid-shadow: 0 10px 25px rgba(13,110,253,0.08);
+    }
+    body{background:var(--bg);font-family: "Poppins", system-ui, sans-serif; -webkit-font-smoothing:antialiased; margin:0; padding-bottom:40px;}
+    header{background:linear-gradient(90deg,var(--accent),#6f42c1); color:white; padding:14px 10px; text-align:center; font-weight:700; letter-spacing:0.6px;}
+    .container-controls{padding:16px 12px; display:flex; gap:8px; flex-wrap:wrap; justify-content:center; align-items:center;}
+    #puzzle-area{max-width:900px;margin:14px auto;padding:18px;background:var(--card);border-radius:14px; box-shadow:var(--kid-shadow); position:relative;}
+    #puzzle-wrapper{display:flex; gap:16px; align-items:flex-start; justify-content:center; flex-wrap:wrap;}
+    #puzzle-container{display:grid; touch-action:none; user-select:none; width: min(80vmin, 640px); height: min(80vmin, 640px); background:#eee; border-radius:8px; overflow:hidden; position:relative;}
+    .piece{
+      border:2px solid rgba(255,255,255,0.15);
+      box-sizing:border-box;
+      background-size: cover;
+      background-position:center;
+      background-repeat:no-repeat;
+      transition: transform 200ms cubic-bezier(.2,.9,.2,1), box-shadow 160ms;
+      touch-action:none;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:800; color:transparent;
+      cursor:grab;
+    }
+    .piece.correct{box-shadow: 0 6px 18px rgba(40,167,69,0.18); outline:3px solid rgba(40,167,69,0.15); cursor:default;}
+    .piece.wrong{outline:3px solid rgba(220,53,69,0.12);}
+    .controls-row{display:flex;gap:8px;flex-wrap:wrap; align-items:center; justify-content:center;}
+    .info-row{display:flex;gap:12px;align-items:center;justify-content:center;margin-top:8px;}
+    #hint-thumb{width:110px;height:80px;border-radius:8px;object-fit:cover;box-shadow:0 6px 18px rgba(0,0,0,0.08);border:2px solid rgba(0,0,0,0.06)}
+    .stat-bubble{background:linear-gradient(180deg,#fff,#f8f9fa);padding:8px 12px;border-radius:999px;box-shadow:0 6px 18px rgba(0,0,0,0.04);font-weight:600;}
+    .btn-pill{border-radius:999px;}
+    .small-muted{font-size:0.85rem;color:#666;}
+    #canvas-effects{position: absolute; inset: 0; pointer-events: none; z-index: 40;}
+    footer{margin-top:12px;text-align:center;color:#666;font-size:0.9rem;}
+    @media (max-width:600px){
+      #hint-thumb{width:86px;height:64px;}
+      #puzzle-container{width:86vmin;height:86vmin;}
+    }
+  </style>
+</head>
+<body>
+  <header>BalVidya Puzzle — मज़ेदार सीखने वाला खेल 🎯</header>
+
+  <div class="container-controls">
+    <div class="controls-row w-100 justify-content-center">
+      <input id="imageInput" type="file" accept="image/*" class="form-control w-auto" />
+      <select id="difficulty" class="form-select w-auto">
+        <option value="3">3 x 3</option>
+        <option value="4" selected>4 x 4</option>
+        <option value="6">6 x 6</option>
+      </select>
+      <button id="startBtn" class="btn btn-primary btn-pill">Start</button>
+      <button id="shuffleBtn" class="btn btn-outline-primary btn-pill">Shuffle</button>
+      <button id="saveBtn" class="btn btn-success btn-pill">Save</button>
+      <button id="loadBtn" class="btn btn-warning btn-pill">Load</button>
+      <button id="hintToggle" class="btn btn-outline-secondary btn-pill">Hint</button>
+      <a href="games.html" class="btn btn-outline-info btn-pill">🎮 Back</a>
+    </div>
+  </div>
+
+  <div id="puzzle-area">
+    <div id="puzzle-wrapper">
+      <div id="puzzle-container" aria-label="Puzzle board"></div>
+
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:center;">
+        <img id="hint-thumb" class="d-none" alt="Hint thumbnail" />
+        <div class="stat-bubble">⏱️ <span id="timer">0s</span></div>
+        <div class="stat-bubble">🔁 Moves: <span id="moves">0</span></div>
+        <div class="stat-bubble">🏆 Best: <span id="best">—</span></div>
+      </div>
+    </div>
+
+    <canvas id="canvas-effects"></canvas>
+  </div>
+
+  <footer class="small-muted">Auto-snap enabled • Hindi voice feedback on win • Drag (touch/mouse) supported</footer>
+
+  <script>
+  // --- Variables & elements ---
+  const imageInput = document.getElementById('imageInput');
+  const difficulty = document.getElementById('difficulty');
+  const startBtn = document.getElementById('startBtn');
+  const shuffleBtn = document.getElementById('shuffleBtn');
+  const saveBtn = document.getElementById('saveBtn');
+  const loadBtn = document.getElementById('loadBtn');
+  const hintToggle = document.getElementById('hintToggle');
+  const puzzleContainer = document.getElementById('puzzle-container');
+  const hintThumb = document.getElementById('hint-thumb');
+  const timerEl = document.getElementById('timer');
+  const movesEl = document.getElementById('moves');
+  const bestEl = document.getElementById('best');
+  const canvas = document.getElementById('canvas-effects');
+  const ctx = canvas.getContext('2d');
+
+  let originalImage = null;
+  let imgObj = new Image();
+  let size = 4;
+  let board = []; // stores indices of pieces in current order
+  let total = 0;
+  let pieceSizePx = 0;
+  let timer = 0, intervalId = null;
+  let moves = 0;
+  let dragging = null; // {index, node, startX...}
+  let ghost = null;
+  let autoSnap = true; // user wanted Auto Snap = Yes
+  let bestKeyBase = 'balvidya_best_'; // per-grid best key
+
+  // --- Helpers ---
+  function px(v){ return `${v}px`; }
+  function startTimer(){
+    clearInterval(intervalId);
+    timer = 0;
+    timerEl.textContent = `${timer}s`;
+    intervalId = setInterval(()=>{ timer++; timerEl.textContent = `${timer}s`; }, 1000);
+  }
+  function stopTimer(){ clearInterval(intervalId); intervalId = null; }
+  function updateMoves(){ movesEl.textContent = moves; }
+  function loadBest(){ const b = localStorage.getItem(bestKeyBase + size); if(b) bestEl.textContent = b + 's'; else bestEl.textContent = '—'; }
+
+  // --- Canvas effects (confetti + fireworks simple) ---
+  let effects = [];
+  canvas.width = canvas.clientWidth = puzzleContainer.clientWidth;
+  canvas.height = canvas.clientHeight = puzzleContainer.clientHeight;
+  window.addEventListener('resize', ()=>{ canvas.width = puzzleContainer.clientWidth; canvas.height = puzzleContainer.clientHeight; });
+
+  function emitConfetti(x,y){
+    for(let i=0;i<40;i++){
+      effects.push({
+        type:'confetti',
+        x: x + (Math.random()-0.5)*60,
+        y: y,
+        vx: (Math.random()-0.5)*6,
+        vy: - (2 + Math.random()*6),
+        r: 4 + Math.random()*6,
+        c: ['#ff7a59','#ffd166','#4cc9f0','#90be6d','#7209b7'][Math.floor(Math.random()*5)],
+        life: 80 + Math.random()*40
+      });
+    }
+  }
+  function emitFireworks(x,y){
+    // create explosion particles
+    for(let i=0;i<60;i++){
+      const ang = Math.random()*Math.PI*2;
+      const sp = Math.random()*6 + 2;
+      effects.push({
+        type:'fire',
+        x, y,
+        vx: Math.cos(ang)*sp,
+        vy: Math.sin(ang)*sp,
+        r: 2 + Math.random()*3,
+        c: ['#ffd166','#ff7a59','#f94144','#577590','#43aa8b'][Math.floor(Math.random()*5)],
+        life: 50 + Math.random()*60
+      });
+    }
+  }
+  function tickEffects(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    for(let i=effects.length-1;i>=0;i--){
+      const p = effects[i];
+      if(p.type==='confetti'){
+        p.x += p.vx; p.y += p.vy; p.vy += 0.18; p.life--;
+        ctx.save();
+        ctx.translate(p.x,p.y);
+        ctx.rotate((p.life)*0.1);
+        ctx.fillStyle = p.c;
+        ctx.fillRect(-p.r/2, -p.r/2, p.r, p.r*1.8);
+        ctx.restore();
+      } else {
+        p.x += p.vx; p.y += p.vy; p.vy += 0.06; p.life--;
+        ctx.beginPath();
+        ctx.fillStyle = p.c;
+        ctx.globalAlpha = Math.max(0, p.life/120);
+        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+      if(p.life<=0) effects.splice(i,1);
+    }
+    requestAnimationFrame(tickEffects);
+  }
+  tickEffects();
+
+  // --- File input ---
+  imageInput.addEventListener('change', (e)=>{
+    const f = e.target.files[0];
+    if(!f) return;
+    const reader = new FileReader();
+    reader.onload = (ev)=> {
+      originalImage = ev.target.result;
+      imgObj = new Image();
+      imgObj.onload = ()=> {
+        hintThumb.src = originalImage;
+        hintThumb.classList.remove('d-none');
+        startNewPuzzle();
+      };
+      imgObj.src = originalImage;
+    };
+    reader.readAsDataURL(f);
+  });
+
+  difficulty.addEventListener('change', ()=> {
+    size = parseInt(difficulty.value,10);
+    loadBest();
+    if(originalImage) startNewPuzzle();
+  });
+
+  startBtn.addEventListener('click', ()=> {
+    if(!originalImage) return alert('Kripya pehle image select karein.');
+    startNewPuzzle();
+  });
+
+  shuffleBtn.addEventListener('click', ()=>{
+    if(!originalImage) return;
+    shuffleBoard();
+    renderBoard();
+  });
+
+  saveBtn.addEventListener('click', ()=>{
+    if(!originalImage) return alert('Koi puzzle nahin hai save karne ke liye.');
+    localStorage.setItem('puzzle_img', originalImage);
+    localStorage.setItem('puzzle_size', size);
+    localStorage.setItem('puzzle_order', JSON.stringify(board));
+    localStorage.setItem('puzzle_time', timer);
+    localStorage.setItem('puzzle_moves', moves);
+    alert('Puzzle saved ✅');
+  });
+
+  loadBtn.addEventListener('click', ()=>{
+    const img = localStorage.getItem('puzzle_img');
+    const s = parseInt(localStorage.getItem('puzzle_size')||'0',10);
+    const order = JSON.parse(localStorage.getItem('puzzle_order')||'[]');
+    if(!img || !order.length) return alert('Koi saved puzzle nahin mila.');
+    originalImage = img;
+    imgObj = new Image();
+    imgObj.onload = ()=> {
+      hintThumb.src = originalImage;
+      hintThumb.classList.remove('d-none');
+      size = s;
+      difficulty.value = size;
+      board = order.slice();
+      total = size*size;
+      renderBoard();
+      moves = parseInt(localStorage.getItem('puzzle_moves')||'0',10) || 0;
+      movesEl.textContent = moves;
+      timer = parseInt(localStorage.getItem('puzzle_time')||'0',10) || 0;
+      timerEl.textContent = `${timer}s`;
+      startTimer();
+      loadBest();
+    };
+    imgObj.src = originalImage;
+  });
+
+  hintToggle.addEventListener('click', ()=>{
+    hintThumb.classList.toggle('d-none');
+  });
+
+  // --- Board setup ---
+  function startNewPuzzle(){
+    size = parseInt(difficulty.value,10);
+    total = size*size;
+    board = [];
+    for(let i=0;i<total;i++) board.push(i);
+    shuffle(board);
+    moves = 0;
+    updateMoves();
+    startTimer();
+    loadBest();
+    renderBoard();
+    // update canvas size
+    canvas.width = puzzleContainer.clientWidth;
+    canvas.height = puzzleContainer.clientHeight;
+  }
+
+  // Fisher-Yates
+  function shuffle(arr){
+    for(let i = arr.length-1; i>0; i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [arr[i],arr[j]] = [arr[j],arr[i]];
+    }
+  }
+  function shuffleBoard(){
+    shuffle(board);
+    // ensure not already solved
+    if(board.every((v,i)=>v===i)) shuffleBoard();
+    moves = 0; updateMoves();
+  }
+
+  // --- Render ---
+  function renderBoard(){
+    puzzleContainer.innerHTML = '';
+    puzzleContainer.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+    puzzleContainer.style.gridTemplateRows = `repeat(${size}, 1fr)`;
+
+    // compute each piece size in px for pointer calculations
+    pieceSizePx = puzzleContainer.clientWidth / size;
+
+    for(let i=0;i<total;i++){
+      const idx = board[i];
+      const x = (idx % size);
+      const y = Math.floor(idx / size);
+
+      const div = document.createElement('div');
+      div.className = 'piece';
+      div.dataset.index = idx; // original index this piece belongs to
+      div.dataset.pos = i; // current position in board (0..total-1)
+      div.style.width = '100%';
+      div.style.height = '100%';
+      div.style.backgroundImage = `url(${originalImage})`;
+      div.style.backgroundSize = `${size*100}% ${size*100}%`;
+      div.style.backgroundPosition = `${(x*100)/(size-1)}% ${(y*100)/(size-1)}%`;
+      // border rounding for friendly look
+      div.style.borderRadius = '6px';
+
+      // mark correct/wrong visually
+      if(parseInt(div.dataset.index,10) === i){
+        div.classList.add('correct');
+      } else {
+        div.classList.remove('correct');
+      }
+
+      // pointer events for both touch/mouse
+      div.addEventListener('pointerdown', onPointerDown);
+      div.addEventListener('pointerup', onPointerUp);
+      div.addEventListener('pointercancel', onPointerUp);
+      div.addEventListener('pointermove', onPointerMove);
+
+      // disable native drag
+      div.ondragstart = ()=>false;
+
+      puzzleContainer.appendChild(div);
+    }
+  }
+
+  // --- Drag / Drop using pointer events ---
+  function onPointerDown(e){
+    e.preventDefault();
+    const node = e.currentTarget;
+    node.setPointerCapture(e.pointerId);
+    const pos = parseInt(node.dataset.pos,10);
+
+    // create ghost clone to follow pointer
+    ghost = node.cloneNode(true);
+    ghost.style.position = 'fixed';
+    ghost.style.width = px(pieceSizePx - 8);
+    ghost.style.height = px(pieceSizePx - 8);
+    ghost.style.zIndex = 1000;
+    ghost.style.opacity = 0.95;
+    ghost.style.transform = 'scale(1.02)';
+    ghost.style.pointerEvents = 'none';
+    document.body.appendChild(ghost);
+
+    const rect = node.getBoundingClientRect();
+    dragging = {
+      node, startX: e.clientX, startY: e.clientY,
+      offsetX: e.clientX - rect.left, offsetY: e.clientY - rect.top,
+      pos
+    };
+    node.style.opacity = 0.3;
+  }
+
+  function onPointerMove(e){
+    if(!dragging || !ghost) return;
+    e.preventDefault();
+    ghost.style.left = px(e.clientX - dragging.offsetX + 4);
+    ghost.style.top = px(e.clientY - dragging.offsetY + 4);
+
+    // find target under pointer
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    if(!el) return;
+
+    const pieceEl = el.closest('.piece');
+    // highlight target (optional)
+    Array.from(puzzleContainer.children).forEach(c=> c.classList.remove('hovered'));
+    if(pieceEl && pieceEl !== dragging.node){
+      pieceEl.classList.add('hovered');
+    }
+  }
+
+  function onPointerUp(e){
+    if(!dragging) return;
+    e.preventDefault();
+    try{ dragging.node.releasePointerCapture(e.pointerId); }catch(_){}
+    dragging.node.style.opacity = 1;
+
+    // determine drop target
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    let target = null;
+    if(el) target = el.closest('.piece');
+
+    if(target && target !== dragging.node){
+      // swap positions in board array
+      const fromPos = dragging.pos;
+      const toPos = parseInt(target.dataset.pos,10);
+      [board[fromPos], board[toPos]] = [board[toPos], board[fromPos]];
+      moves++;
+      updateMoves();
+      renderBoard();
+      checkWinWithAutoSnap();
+    } else {
+      // if dropped outside any piece, we can try auto-snap: if released near correct slot
+      // find current node's new index (it may remain same). If its distance to its correct slot on screen is small, snap.
+      // We'll implement auto-snap by checking if current center is within 30px of correct tile center.
+      const fromPos = dragging.pos;
+      const pieceIdx = board[fromPos];
+      const correctPos = pieceIdx; // where it should be
+      const correctRow = Math.floor(correctPos/size);
+      const correctCol = correctPos % size;
+      // compute target center coordinates
+      const containerRect = puzzleContainer.getBoundingClientRect();
+      const centerX = containerRect.left + (correctCol + 0.5) * pieceSizePx;
+      const centerY = containerRect.top + (correctRow + 0.5) * pieceSizePx;
+      const dist = Math.hypot(e.clientX - centerX, e.clientY - centerY);
+      if(autoSnap && dist < Math.min(60, pieceSizePx*0.5)){
+        // swap element at fromPos with element at correct position
+        const toPos = correctPos;
+        // find current index that holds the correctPos piece (where correct tile currently sits)
+        const idxHoldingTarget = board.indexOf(correctPos);
+        if(idxHoldingTarget !== -1 && idxHoldingTarget !== fromPos){
+          [board[fromPos], board[idxHoldingTarget]] = [board[idxHoldingTarget], board[fromPos]];
+          moves++;
+        } else {
+          // if already at correct, nothing
+        }
+        updateMoves();
+        renderBoard();
+        checkWinWithAutoSnap();
+      } else {
+        renderBoard(); // just cancel dragging visual
+      }
+    }
+
+    // cleanup ghost
+    if(ghost && ghost.parentNode) ghost.parentNode.removeChild(ghost);
+    ghost = null;
+    dragging = null;
+  }
+
+  // --- Check win, handle successes ---
+  function checkWinWithAutoSnap(){
+    // check if solved
+    let solved = board.every((val, idx)=> val === idx);
+    if(solved){
+      stopTimer();
+      // show effects
+      const cx = canvas.width/2, cy = canvas.height/2;
+      emitConfetti(cx, cy - 20);
+      emitFireworks(cx, cy - 20);
+      // voice in Hindi
+      speakHindi("शाबाश! आपने पहेली पूरी कर ली।");
+      // save best time per difficulty
+      const prev = parseInt(localStorage.getItem(bestKeyBase + size) || '0', 10);
+      if(prev === 0 || timer < prev){
+        localStorage.setItem(bestKeyBase + size, timer);
+        bestEl.textContent = timer + 's';
+      }
+      setTimeout(()=> alert("🎉 बधाई! Puzzle Complete!\nTime: " + timer + "s\nMoves: " + moves), 200);
+    }
+  }
+
+  // --- Speech (Hindi) ---
+  function speakHindi(text){
+    if(!('speechSynthesis' in window)) return;
+    const utter = new SpeechSynthesisUtterance(text);
+    // try to pick Hindi voice if available
+    const voices = speechSynthesis.getVoices();
+    let hi = voices.find(v => /hindi|hi-|hi_/i.test(v.lang) || /Hindi/i.test(v.name));
+    if(hi) utter.voice = hi;
+    utter.rate = 1;
+    utter.pitch = 1;
+    speechSynthesis.speak(utter);
+  }
+
+  // On load, try to populate best and saved image if any
+  (function init(){
+    size = parseInt(difficulty.value,10);
+    loadBest();
+    const savedImg = localStorage.getItem('puzzle_img');
+    if(savedImg){
+      // show saved as hint thumbnail (not auto load)
+      hintThumb.src = savedImg;
+      hintThumb.classList.remove('d-none');
+    }
+  })();
+
+  // --- Utility: when pieces are changed externally (like shuffle), ensure data-pos updated ---
+  // Our renderBoard sets data-pos appropriately so it's fine.
+
+  // Small improvement: keyboard accessibility to shuffle
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 's') shuffleBtn.click();
+    if(e.key === 'l') loadBtn.click();
+  });
+
+  // Resize observer to update canvas size
+  new ResizeObserver(()=>{
+    canvas.width = puzzleContainer.clientWidth;
+    canvas.height = puzzleContainer.clientHeight;
+  }).observe(puzzleContainer);
+
+  // end script
+  </script>
+</body>
+</html>

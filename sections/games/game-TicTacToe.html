@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tic Tac Toe | Fun Kids Game ❌⭕</title>
+
+<!-- Website Icon -->
+<link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/5969/5969058.png">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+  body {
+    background: #f2f4f7;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+  #board {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-gap: 8px;
+  }
+  .cell {
+    width: 100px;
+    height: 100px;
+    background: white;
+    border-radius: 10px;
+    font-size: 48px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+    user-select: none;
+  }
+  .win {
+    background: #4caf50 !important;
+    color: white !important;
+  }
+  .status {
+    font-size: 24px;
+    margin-bottom: 15px;
+    font-weight: bold;
+  }
+  button {
+    margin-top: 20px;
+  }
+</style>
+</head>
+<body>
+
+<div class="status" id="status">Player X's Turn</div>
+
+<div id="board">
+  <div class="cell" onclick="move(0)"></div>
+  <div class="cell" onclick="move(1)"></div>
+  <div class="cell" onclick="move(2)"></div>
+  <div class="cell" onclick="move(3)"></div>
+  <div class="cell" onclick="move(4)"></div>
+  <div class="cell" onclick="move(5)"></div>
+  <div class="cell" onclick="move(6)"></div>
+  <div class="cell" onclick="move(7)"></div>
+  <div class="cell" onclick="move(8)"></div>
+</div>
+
+<button class="btn btn-primary" onclick="resetGame()">Restart Game 🔄</button> 
+<br><br>
+ <a href="games.html" class="btn btn-outline-primary">🎮 Back to Games</a>
+<script>
+let board = ["", "", "", "", "", "", "", "", ""];
+let currentPlayer = "X";
+let gameOver = false;
+
+const winningPatterns = [
+  [0,1,2], [3,4,5], [6,7,8],
+  [0,3,6], [1,4,7], [2,5,8],
+  [0,4,8], [2,4,6]
+];
+
+function move(index) {
+  if (!gameOver && board[index] === "") {
+    board[index] = currentPlayer;
+    document.getElementsByClassName("cell")[index].innerText = currentPlayer;
+    
+    if (checkWinner()) {
+      document.getElementById("status").innerText = `🎉 Player ${currentPlayer} Wins!`;
+      gameOver = true;
+      highlightWinner(checkWinner());
+    } else if (!board.includes("")) {
+      document.getElementById("status").innerText = "😄 Game Draw!";
+      gameOver = true;
+    } else {
+      currentPlayer = currentPlayer === "X" ? "O" : "X";
+      document.getElementById("status").innerText = `Player ${currentPlayer}'s Turn`;
+    }
+  }
+}
+
+function checkWinner() {
+  for (pattern of winningPatterns) {
+    const [a, b, c] = pattern;
+    if (
+      board[a] &&
+      board[a] === board[b] &&
+      board[a] === board[c]
+    ) {
+      return pattern;
+    }
+  }
+  return null;
+}
+
+function highlightWinner(pattern) {
+  if (!pattern) return;
+  pattern.forEach(i => {
+    document.getElementsByClassName("cell")[i].classList.add("win");
+  });
+}
+
+function resetGame() {
+  board = ["", "", "", "", "", "", "", "", ""];
+  currentPlayer = "X";
+  gameOver = false;
+  document.getElementById("status").innerText = "Player X's Turn";
+
+  const cells = document.getElementsByClassName("cell");
+  for (let cell of cells) {
+    cell.innerText = "";
+    cell.classList.remove("win");
+  }
+}
+</script>
+
+</body>
+</html>

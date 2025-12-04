@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>7x7 Sudoku | BalVidya</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #fef6e4;
+      font-family: Arial, sans-serif;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    #sudoku-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 50px);
+      gap: 3px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    #sudoku-grid input {
+      width: 50px;
+      height: 50px;
+      text-align: center;
+      font-size: 22px;
+      border: 1px solid #333;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+    #sudoku-grid input:disabled {
+      background-color: #ddd;
+      font-weight: bold;
+    }
+    .btn-container {
+      text-align: center;
+      margin-top: 10px;
+    }
+    .btn i {
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container mt-3">
+  <h2>BalVidya Sudoku Game</h2>
+  <div id="sudoku-grid"></div>
+  <div class="btn-container">
+    <button id="check-btn" class="btn btn-success me-2"><i class="bi bi-check-circle"></i>Check</button>
+    <button id="hint-btn" class="btn btn-info me-2"><i class="bi bi-lightbulb"></i>Hint</button>
+    <button id="reset-btn" class="btn btn-warning"><i class="bi bi-arrow-clockwise"></i>Reset</button>
+     <br><br>
+     <a href="games.html" class="btn btn-outline-primary">🎮 Back to Games</a>
+  </div>
+</div>
+
+<!-- Bootstrap Modal for Pop-ups -->
+<div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle">Message</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="modalBody">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const grid = document.getElementById('sudoku-grid');
+
+// Example 7x7 solution
+let solution = [
+  [1,2,3,4,5,6,7],
+  [2,3,4,5,6,7,1],
+  [3,4,5,6,7,1,2],
+  [4,5,6,7,1,2,3],
+  [5,6,7,1,2,3,4],
+  [6,7,1,2,3,4,5],
+  [7,1,2,3,4,5,6]
+];
+
+// Puzzle (0 = empty)
+let puzzle = [
+  [1,0,0,0,5,0,0],
+  [0,3,0,5,0,7,0],
+  [0,0,5,0,0,0,2],
+  [0,5,0,0,0,2,0],
+  [5,0,0,1,0,0,4],
+  [0,7,0,0,3,0,0],
+  [0,0,2,0,0,5,6]
+];
+
+// Create grid
+for(let i=0;i<7;i++){
+  for(let j=0;j<7;j++){
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.min = 1;
+    input.max = 7;
+    if(puzzle[i][j] !== 0){
+      input.value = puzzle[i][j];
+      input.disabled = true;
+    }
+    input.dataset.row = i;
+    input.dataset.col = j;
+    grid.appendChild(input);
+  }
+}
+
+// Modal instance
+const messageModal = new bootstrap.Modal(document.getElementById('messageModal'));
+
+// Check solution
+document.getElementById('check-btn').addEventListener('click', ()=>{
+  const inputs = grid.querySelectorAll('input');
+  let correct = true;
+  inputs.forEach(input=>{
+    let row = input.dataset.row;
+    let col = input.dataset.col;
+    if(input.value != solution[row][col]){
+      correct = false;
+      input.style.backgroundColor = '#f88';
+    } else {
+      input.style.backgroundColor = '#8f8';
+    }
+  });
+  document.getElementById('modalTitle').innerText = correct ? 'बधाई!' : 'गलत नंबर';
+  document.getElementById('modalBody').innerText = correct ? 
+    'सभी नंबर सही हैं! 7x7 Sudoku Solve हो गया!' : 
+    'कुछ नंबर गलत हैं। सही करने की कोशिश करें!';
+  messageModal.show();
+});
+
+// Hint button - fills a random empty cell
+document.getElementById('hint-btn').addEventListener('click', ()=>{
+  const emptyInputs = Array.from(grid.querySelectorAll('input')).filter(inp => !inp.disabled && inp.value==='');
+  if(emptyInputs.length===0){
+    document.getElementById('modalTitle').innerText = 'Hint';
+    document.getElementById('modalBody').innerText = 'कोई खाली सेल नहीं बचा!';
+    messageModal.show();
+    return;
+  }
+  const randomCell = emptyInputs[Math.floor(Math.random()*emptyInputs.length)];
+  const r = randomCell.dataset.row;
+  const c = randomCell.dataset.col;
+  randomCell.value = solution[r][c];
+  randomCell.style.backgroundColor = '#8ff';
+});
+
+// Reset puzzle
+document.getElementById('reset-btn').addEventListener('click', ()=>{
+  const inputs = grid.querySelectorAll('input');
+  inputs.forEach(input=>{
+    if(!input.disabled){
+      input.value = '';
+      input.style.backgroundColor = '#fff';
+    }
+  });
+});
+</script>
+
+</body>
+</html>
